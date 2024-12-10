@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="width=device-width, initial-scale=1.0">
+    <title>岭师去逛街</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+        }
+        #container {
+            width: 75%; /* 地图占页面75%宽度 */
+            height: 100vh;
+        }
+        #sidebar {
+            width: 25%; /* 侧边栏占页面25%宽度 */
+            height: 100vh;
+            overflow-y: auto;
+            padding: 10px;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+        #sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        #sidebar li {
+            padding: 10px;
+            background: #f0f0f0;
+            margin: 5px 0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #sidebar li:hover {
+            background: #e0e0e0;
+        }
+    </style>
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: '3484a9546e2131a89b98e44eb069deda'
+        };
+    </script>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=e94bab3df95001c71d3c7f27dcf9fb8c"></script>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="sidebar">
+        <h3>选择商场</h3>
+        <ul id="mall-list"></ul>
+    </div>
+    <script>
+        // 初始化地图
+        var map = new AMap.Map('container', {
+            center: [110.347055, 21.269070], // 学校南门位置
+            zoom: 14,
+            viewMode: '3D',
+            pitch: 45,
+            layers: [new AMap.TileLayer.Satellite()] // 添加卫星图层
+        });
+
+        // 学校南门经纬度
+        var schoolSouthGate = [110.346379, 21.263321];
+
+        // 商场列表 (可以在这里添加新的商场名称和坐标)
+        var malls = [
+            { name: "湛江万达广场", coords: [110.403516, 21.248822] },
+            { name: "湛江鼎盛广场", coords: [110.401107, 21.210554] },
+            { name: "湛江华都会", coords: [110.398650, 21.227472] },
+            { name: "湛江印象汇", coords: [110.367633, 21.264638] },
+            { name: "湛江鹰展假日广场", coords: [110.376171, 21.274933] },
+            { name: "湛江丽悦新天", coords: [110.393130, 21.265935] }
+        ];
+
+        // 存储每条路径对象
+        var routes = [];
+
+        // 初始化商场列表并添加点击事件
+        var mallList = document.getElementById('mall-list');
+        malls.forEach((mall, index) => {
+            var li = document.createElement('li');
+            li.textContent = mall.name;
+            li.addEventListener('click', function () {
+                highlightRoute(index);
+            });
+            mallList.appendChild(li);
+        });
+
+        // 路径规划函数
+        function planRoute(start, end, index) {
+            AMap.plugin('AMap.Driving', function () {
+                var driving = new AMap.Driving({
+                    map: map,
+                    policy: AMap.DrivingPolicy.LEAST_TIME
+                });
+
+                driving.search(start, end, function (status, result) {
+                    if (status === 'complete' && result.routes.length > 0) {
+                        // 绘制路径
+                        var path = result.routes[0].steps.reduce((acc, step) => {
+                            return acc.concat(step.path);
+                        }, []);
+
+                        var polyline = new AMap.Polyline({
+                            path: path,
+                            strokeColor: 'gray', // 默认颜色为灰色
+                            strokeWeight: 6,
+                            strokeOpacity: 0.7
+                        });
+                        polyline.setMap(map);
+
+                        // 保存路径对象
+                        routes[index] = { polyline: polyline, route: result.routes[0] };
+                    } else {
+                        console.error(`路径规划失败: ${mall.name}`);
+                    }
+                });
+            });
+        }
+
+        // 高亮选中的路径
+        function highlightRoute(index) {
+            routes.forEach((route, i) => {
+                if (route) {
+                    if (i === index) {
+                        // 先移除，再重新添加高亮路径以置顶
+                        route.polyline.setMap(null);
+                        route.polyline.setOptions({
+                            strokeColor: 'blue', // 高亮当前路径
+                            strokeWeight: 8,
+                            strokeOpacity: 1
+                        });
+                        route.polyline.setMap(map); // 重新添加高亮路径
+                    } else {
+                        // 重置其他路径的样式
+                        route.polyline.setOptions({
+                            strokeColor: 'gray',
+                            strokeWeight: 6,
+                            strokeOpacity: 0.7
+                        });
+                    }
+                }
+            });
+        }
+
+        // 规划所有路径
+        malls.forEach((mall, index) => {
+            planRoute(schoolSouthGate, mall.coords, index);
+        });
+    </script>
+</body>
+</html>

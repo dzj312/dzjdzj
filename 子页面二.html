@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="keywords" content="高德地图,DIY地图,高德地图生成器">
+  <meta name="description" content="高德地图，DIY地图，自己制作地图，生成自己的高德地图">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>岭师有多长</title>
+  <style>
+    body { margin: 0; font: 14px/1.5 "Microsoft YaHei", sans-serif; }
+    #mapContainer { width: 100%; height: 100vh; position: relative; }
+    
+    /* 右上角的提示文字样式 */
+    .info {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 16px;
+      color: #333;
+      text-align: center;
+      min-width: 15rem;
+    }
+
+    .myinfowindow { width: 240px; min-height: 50px; }
+    .myinfowindow h5 { height: 20px; line-height: 20px; overflow: hidden; font-size: 14px; font-weight: bold; text-overflow: ellipsis; }
+    .myinfowindow div { margin-top: 10px; line-height: 20px; font-size: 13px; color: #6f6f6f; }
+  </style>
+  <script src="https://webapi.amap.com/maps?v=2.0&key=e94bab3df95001c71d3c7f27dcf9fb8c"></script>
+</head>
+
+<body>
+  <div id="mapContainer"></div>
+  <!-- 右上角的提示 -->
+  <div class="info">可拖动图标算算两点间距离</div>
+
+  <script>
+    // 初始化地图
+    var map = new AMap.Map('mapContainer', {
+      center: [110.347055, 21.269070], // 地图中心点
+      zoom: 16, // 缩放级别
+      layers: [new AMap.TileLayer.Satellite()] // 添加卫星图层
+    });
+
+    // 创建两个可拖动的标记
+    var m1 = new AMap.Marker({
+      position: [110.346379, 21.263321],
+      draggable: true,
+      map: map
+    });
+
+    var m2 = new AMap.Marker({
+      position: [110.351840, 21.274958],
+      draggable: true,
+      map: map
+    });
+
+    // 绘制连线
+    var line = new AMap.Polyline({
+      strokeColor: '#80d8ff', // 线颜色
+      strokeWeight: 4,       // 线宽
+      isOutline: true,       // 是否描边
+      outlineColor: 'white', // 描边颜色
+      map: map
+    });
+
+    // 显示距离文本
+    var text = new AMap.Text({
+      text: '',
+      style: {
+        'background-color': '#29b6f6',
+        'border-color': '#e1f5fe',
+        'font-size': '12px',
+        'color': '#ffffff',
+        'padding': '5px',
+        'border-radius': '5px'
+      },
+      map: map
+    });
+
+    // 获取用于显示两点间距离的提示 div
+    var infoDiv = document.querySelector('.info');
+
+    // 计算两点间距离并更新显示
+    function computeDis() {
+      var p1 = m1.getPosition();
+      var p2 = m2.getPosition();
+      var textPos = new AMap.LngLat(
+        (p1.lng + p2.lng) / 2,
+        (p1.lat + p2.lat) / 2
+      );
+      var distance = AMap.GeometryUtil.distance(p1, p2); // 计算距离
+      line.setPath([p1, p2]); // 设置线路径
+      text.setText('两点相距 ' + Math.round(distance) + ' 米');
+      text.setPosition(textPos); // 设置文本位置
+
+      // 更新 info div 中的文本内容
+      infoDiv.textContent = '两点相距 ' + Math.round(distance) + ' 米';
+    }
+
+    // 监听标记拖动事件并重新计算距离
+    m1.on('dragging', computeDis);
+    m2.on('dragging', computeDis);
+
+    // 初次计算距离
+    map.plugin(['AMap.GeometryUtil'], function () {
+      computeDis();
+    });
+
+    // 加载其他地图要素
+    var features = [{
+      name: "岭南师范学院（寸金校区）",
+      desc: "还有个湖光校区，技术不够，不知道怎么放进来，反正寸金就这么大点，量一量距离吧！",
+      path: [
+        [110.340254, 21.268311],
+        [110.341992, 21.264792],
+        [110.342872, 21.264032],
+        [110.343022, 21.263792],
+        [110.344610, 21.263352],
+        [110.345469, 21.262892],
+        [110.347292, 21.263732],
+        [110.346863, 21.265392],
+        [110.347614, 21.267032],
+        [110.348365, 21.268311],
+        [110.349267, 21.268651],
+        [110.349503, 21.269371],
+        [110.350876, 21.270491],
+        [110.351176, 21.270991],
+        [110.354009, 21.271931],
+        [110.353322, 21.27413],
+        [110.352935, 21.27501],
+        [110.350919, 21.27511],
+        [110.350232, 21.27323],
+        [110.349224, 21.270851],
+        [110.348516, 21.270731],
+        [110.347314, 21.272271],
+        [110.344224, 21.270371],
+        [110.343881, 21.269811],
+        [110.343001, 21.268871],
+        [110.342700, 21.269331],
+        [110.340254, 21.268311]
+      ]
+    }];
+
+    features.forEach(feature => {
+      new AMap.Polyline({
+        path: feature.path,
+        strokeColor: "#ff0000",
+        strokeWeight: 3,
+        map: map
+      });
+
+      // 添加信息窗口
+      map.on('click', function (e) {
+        var infoWindow = new AMap.InfoWindow({
+          content: `<div class='myinfowindow'><h5>${feature.name}</h5><div>${feature.desc}</div></div>`,
+          offset: new AMap.Pixel(0, -30)
+        });
+        infoWindow.open(map, e.lnglat);
+      });
+    });
+
+    map.setFitView(); // 自动调整视图
+  </script>
+</body>
+</html>

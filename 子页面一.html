@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+  <title>各色的岭师</title>
+  <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+  <style>
+    html,
+    body,
+    #container {
+      width: 100%;
+      height: 100%;
+    }
+
+    #map-styles .input-item {
+      height: 2rem;
+    }
+
+    #map-styles .input-item span{
+      display: inline-block;
+      width: 4rem;
+    }
+
+    #map-styles .input-item .input-text {
+      color: #0288d1;
+      margin-left: 1rem;
+      margin-right: 0rem;
+      width: 6rem;
+    }
+  </style>
+    <!-- 引入高德地图 API 安全配置 -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+          securityJsCode: "3484a9546e2131a89b98e44eb069deda", // 安全配置，如果不需要可以删除
+        };
+    </script>
+    <script src="https://webapi.amap.com/loader.js"></script>
+</head>
+
+<body>
+  <div id="container"></div>
+  <div class="input-card" style="width:16rem">
+    <h4>来给岭师换换色儿~~</h4>
+    <div id="map-styles">
+      <div class="input-item">
+        <input type='radio' name='mapStyle' value='normal'>
+        <span>标准</span>
+        <span class="input-text">normal</span>
+      </div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='dark'><span>幻影黑</span><span class="input-text">dark</span></div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='light'><span>月光银</span><span class="input-text">light</span></div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='whitesmoke' checked><span>远山黛</span><span class="input-text">whitesmoke</span></div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='fresh'><span>草色青</span><span class="input-text">fresh</span></div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='grey'><span>雅士灰</span><span class="input-text">grey</span></div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='graffiti'><span>涂鸦</span><span class="input-text">graffiti</span></div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='macaron'><span>马卡龙</span><span class="input-text">macaron</span></div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='blue'><span>靛青蓝</span><span class="input-text">blue</span></div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='darkblue'><span>极夜蓝</span><span class="input-text">darkblue</span></div>
+      <div class="input-item"><input type='radio' name='mapStyle' value='wine'><span>酱籽</span><span class="input-text">wine</span></div>
+    </div>
+  </div>
+  <script src="https://cache.amap.com/lbs/static/es5.min.js"></script>
+  <script src="https://webapi.amap.com/maps?v=2.0&key=e94bab3df95001c71d3c7f27dcf9fb8c"></script>
+  <script>
+    //初始化地图
+    var map = new AMap.Map('container', {
+                center: [110.346916, 21.269040], // 初始中心坐标
+                zoom: 16, // 初始缩放级别
+                viewMode: '3D', // 3D 模式
+                pitch: 45, // 视角倾斜角度
+            });
+
+    //绑定radio点击事件
+    var radios = document.querySelectorAll("#map-styles input");
+    radios.forEach(function(ratio) {
+      ratio.onclick = setMapStyle;
+    });
+
+    function setMapStyle() {
+      var styleName = "amap://styles/" + this.value;
+      map.setMapStyle(styleName);
+    }
+
+    // 使用控件
+    AMap.plugin(
+    ['AMap.ToolBar', 'AMap.Scale', 'AMap.ControlBar'], // 加载工具条、比例尺、控制条控件
+    function() {
+        map.addControl(new AMap.ToolBar()); // 添加工具条控件
+        map.addControl(new AMap.Scale()); // 添加比例尺控件
+        map.addControl(new AMap.ControlBar()); // 添加控制条控件
+    }
+    );
+  </script>
+</body>
+
+</html>
